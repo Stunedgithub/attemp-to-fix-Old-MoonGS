@@ -10,5 +10,5 @@ Have fun skidding this.<br>
 PS: also thanks to milxnor for some shits.<br>
 if you need help dm me: android#1337<br><br>
 
-L Skid 😭💀<br>
+L Skid 😭💀💀💀😭<br>
 <center><img src="https://media.discordapp.net/attachments/977298356126748692/1001185096142954596/unknown.png"></img></br>
