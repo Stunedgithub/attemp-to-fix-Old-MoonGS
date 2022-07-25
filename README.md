@@ -1,4 +1,4 @@
-# Old-MoonGS
+# A Fortnite game server
 
 Modified raider ported to other fortnite versions.<br>
 This is really old, broken, and messy but you can use it to learn.<br>
