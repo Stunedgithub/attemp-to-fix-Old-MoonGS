@@ -6,3 +6,4 @@ Much gameplay is fixed but you will have to fix the movement and the desync on y
 Someone wanted to leak it and get credits for its own so there it is for yall. He had that version so Ill release that specific one, not a more recent one, nor the latest.<br>
 Have fun skidding this.<br>
 PS: also thanks to milxnor for some shits.<br>
+if you need help dm me: android#1337<br>
