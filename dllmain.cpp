@@ -1,28 +1,7 @@
-#pragma once
-
-//#define VERSION_3_5
-//#define VERSION_4_1
-//#define VERSION_4_5
-//#define VERSION_5_21
 #define VERSION_7_3
 
 bool bRespawn = true;
 
-#ifdef VERSION_3_5
-#include "FortniteGame/SDKS/3_5/SDK.hpp"
-#endif
-
-#ifdef VERSION_4_1
-#include "FortniteGame/SDKS/4_1/SDK.hpp"
-#endif
-
-#ifdef VERSION_4_5
-#include "FortniteGame/SDKS/4_5/SDK.hpp"
-#endif
-
-#ifdef VERSION_5_21
-#include "FortniteGame/SDKS/5_21/SDK.hpp"
-#endif
 
 #ifdef VERSION_7_3
 #include "FortniteGame/SDKS/7_3/SDK.hpp"
@@ -84,10 +63,10 @@ void Main()
 
     Functions::Initialize();
 
-    printf("[+] Initializing android's 4.1\n");
+    printf("[+] Initializing android's 7.3\n");
 
     Abilities::Initialize();
-    
+
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
     DetourAttach(&(void*&)Functions::NetDriver::TickFlush, Hooks::TickFlush);
@@ -98,14 +77,14 @@ void Main()
 
     printf("[+] Hooked Functions\n");
 
-    
+
 #ifdef VERSION_4_5
     std::vector<BYTE> patch = { 0xE9, 0x39, 0x02, 0x00, 0x00 };
 
     for (int i = 0; i < patch.size(); i++)
         *(BYTE*)(uintptr_t(GetModuleHandle(0)) + 0xAEC475 + i) = patch[i];
 #endif
-    
+
 
 
 
@@ -117,7 +96,7 @@ void Main()
 
     for (int i = 0; i < ItemDefinitions::WeaponItemDefinitionArray.size(); i++)
         ItemDefinitions::WeaponItemDefinitionAddresses.push_back(FindObjectFast<UFortItemDefinition>(ItemDefinitions::WeaponItemDefinitionArray[i]));
-    
+
     for (int i = 0; i < ItemDefinitions::ConsumableItemDefinitionArray.size(); i++)
         ItemDefinitions::ConsumableItemDefinitionAddresses.push_back(FindObjectFast<UFortItemDefinition>(ItemDefinitions::ConsumableItemDefinitionArray[i]));
 
@@ -129,8 +108,8 @@ void Main()
 
     for (int i = 0; i < ItemDefinitions::TrapItemDefinitionArray.size(); i++)
         ItemDefinitions::TrapItemDefinitionAddresses.push_back(FindObjectFast<UFortItemDefinition>(ItemDefinitions::TrapItemDefinitionArray[i]));
-    
-    ItemDefinitions::Pickaxe = FindObjectFast<UFortItemDefinition>("/Game/Athena/Items/Weapons/WID_Harvest_Pickaxe_Teslacoil_Athena.WID_Harvest_Pickaxe_Teslacoil_Athena");
+
+    ItemDefinitions::Pickaxe = FindObjectFast<UFortItemDefinition>("/Game/Athena/Items/Weapons/WID_Harvest_Pickaxe_Celestial.WID_Harvest_Pickaxe_Celestial");
 
     printf("[+] Initialized Weapons\n");
 
@@ -223,8 +202,6 @@ void Main()
                 auto GameState = (AFortGameStateAthena*)(GetWorld()->GameState);
 
                 auto ClientConnections = GetWorld()->NetDriver->ClientConnections;//HostBeacon->NetDriver->ClientConnections;
-                std::string ConnectedPlayers = std::format("Connected Clients -> {}\n", ClientConnections.Num());
-                ImGui::Text(ConnectedPlayers.c_str());
 
                 if (GameState->GamePhase < EAthenaGamePhase::Aircraft)
                 {

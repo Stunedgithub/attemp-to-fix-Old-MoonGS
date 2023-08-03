@@ -201,9 +201,6 @@
     <ClInclude Include="FortniteGame\Abilities\Aircraft.h">
       <Filter>FortniteGame\Abilities</Filter>
     </ClInclude>
-    <ClInclude Include="FortniteGame\ItemDefinitions\ItemDefinitions.h">
-      <Filter>FortniteGame\ItemDefinitions</Filter>
-    </ClInclude>
     <ClInclude Include="FortniteGame\SDKS\4_1\SDK.hpp">
       <Filter>FortniteGame\SDKS\4_1</Filter>
     </ClInclude>
@@ -239,6 +236,9 @@
     </ClInclude>
     <ClInclude Include="FortniteGame\SDKS\7_3\SDK.hpp">
       <Filter>FortniteGame\SDKS\7_3</Filter>
+    </ClInclude>
+    <ClInclude Include="FortniteGame\SDKS\7_3\SDK\FN_Engine_classes.hpp">
+      <Filter>FortniteGame\SDKS\7_3\SDK</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
