@@ -1,4 +1,4 @@
-join dsscord to updates https://discord.gg/jKDPHPrKNB
+join discord to updates https://discord.gg/jKDPHPrKNB
 Attempting to fix moongs 7.3 
 
 Players need to join when map is loaded if not guaranteed crash
