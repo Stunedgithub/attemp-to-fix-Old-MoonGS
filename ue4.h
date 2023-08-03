@@ -11,9 +11,10 @@ constexpr auto PI = 3.1415926535897932f;
 
 inline bool bTraveled = false;
 inline bool bListening = false;
+inline bool bTraveled2 = false;
 static bool bSpawnedFloorLoot = false;
 
-//static AFortOnlineBeaconHost* HostBeacon = nullptr;
+static AFortOnlineBeaconHost* HostBeacon = nullptr;
 
 inline UWorld* GetWorld()
 {
@@ -310,9 +311,9 @@ inline AFortWeapon* EquipWeaponDefinition(APawn* dPawn, UFortWeaponItemDefinitio
             else if (Ammo != -1)
                 Weapon->AmmoCount = Ammo;
 
-            if(Instance->ItemEntry.ItemDefinition->ObjectFlags)
+            if (Instance->ItemEntry.ItemDefinition->ObjectFlags)
 
-            Instance->ItemEntry.LoadedAmmo = Weapon->AmmoCount;
+                Instance->ItemEntry.LoadedAmmo = Weapon->AmmoCount;
 
             Weapon->Owner = dPawn;
             Weapon->SetOwner(dPawn);
@@ -411,9 +412,9 @@ inline void SpawnPickupFromFloorLoot(auto ItemDef, int Count, FVector Location)
 template <typename Class>
 static FFortItemEntry FindItemInInventory(AFortPlayerControllerAthena* PC, bool& bFound)
 {
-    
+
     auto ret = FFortItemEntry();
-    /*
+    
     auto& ItemInstances = PC->WorldInventory->Inventory.ItemInstances;
 
     bFound = false;
@@ -433,7 +434,7 @@ static FFortItemEntry FindItemInInventory(AFortPlayerControllerAthena* PC, bool&
             ret = ItemInstance->ItemEntry;
         }
     }
-    */
+    
     return ret;
 }
 
@@ -539,7 +540,7 @@ FTransform GetPlayerStart(AFortPlayerControllerAthena* PC)
     auto SpawnTransform = FTransform();
     SpawnTransform.Scale3D = FVector(1, 1, 1);
     SpawnTransform.Rotation = FQuat();
-    SpawnTransform.Translation = FVector{ -124461, -116273, 4000 };
+    SpawnTransform.Translation = FVector{ 1250, 1818, 3284 };
 
     auto GamePhase = ((AFortGameStateAthena*)GetWorld()->GameState)->GamePhase;
 
@@ -578,7 +579,6 @@ inline auto ApplyAbilities(APawn* _Pawn)
     static auto EmoteAbility = UObject::FindClass("BlueprintGeneratedClass GAB_Emote_Generic.GAB_Emote_Generic_C");
     static auto TrapAbility = UObject::FindClass("BlueprintGeneratedClass GA_TrapBuildGeneric.GA_TrapBuildGeneric_C");
     static auto DanceGrenadeAbility = UObject::FindClass("BlueprintGeneratedClass GA_DanceGrenade_Stun.GA_DanceGrenade_Stun_C");
-
 #ifdef VERSION_7_3
     static auto VehicleEnter = UObject::FindClass("BlueprintGeneratedClass GA_AthenaEnterVehicle.GA_AthenaEnterVehicle_C");
     static auto VehicleExit = UObject::FindClass("BlueprintGeneratedClass GA_AthenaExitVehicle.GA_AthenaExitVehicle_C");
@@ -602,7 +602,7 @@ inline auto ApplyAbilities(APawn* _Pawn)
     GrantGameplayAbility(Pawn, EmoteAbility);
     GrantGameplayAbility(Pawn, TrapAbility);
     GrantGameplayAbility(Pawn, DanceGrenadeAbility);
-
+    
 #ifdef VERSION_7_3
     GrantGameplayAbility(Pawn, VehicleEnter);
     GrantGameplayAbility(Pawn, VehicleExit);
@@ -728,6 +728,134 @@ void EquipTrapTool(AController* Controller)
     }
 }
 
+APlayerPawn_Athena_C* InitializePawnNOCP(AFortPlayerControllerAthena* PlayerController, FVector Loc = FVector(), FQuat Rot = FQuat(), bool open_glider = false)
+{
+    if (PlayerController->Pawn)
+        PlayerController->Pawn->K2_DestroyActor();
+
+    if (Loc.X == 0 && Loc.Y == 0 && Loc.Z == 0)
+        Loc = GetPlayerStart(PlayerController).Translation;
+
+    auto Pawn = SpawnActor< APlayerPawn_Athena_C>(Loc, PlayerController, Rot);
+    Pawn->Owner = PlayerController;
+    Pawn->OnRep_Owner();
+
+    Pawn->NetCullDistanceSquared = 0.f;
+
+    PlayerController->Pawn = Pawn;
+    PlayerController->AcknowledgedPawn = Pawn;
+    PlayerController->AcknowledgedPawn = PlayerController->Pawn;
+    PlayerController->OnRep_Pawn();
+    PlayerController->Possess(Pawn);
+   
+    
+    Pawn->bReplicateMovement = true; 
+    Pawn->OnRep_ReplicateMovement(); 
+    Pawn->OnRep_ReplicatedMovement(); 
+    Pawn->OnRep_ReplicatedBasedMovement();
+
+    if (open_glider)
+        Pawn->CharacterMovement->SetMovementMode(EMovementMode::MOVE_Custom, 4U);
+
+
+    Pawn->SetMaxHealth(100);
+    Pawn->SetMaxShield(100);
+
+    auto PlayerState = (AFortPlayerStateAthena*)PlayerController->PlayerState;
+
+    auto& HealthSet = Pawn->HealthSet;
+    Pawn->SetHealth(100);
+    HealthSet->Health.CurrentValue = 100;
+    PlayerState->CurrentHealth = 100;
+    HealthSet->OnRep_Health();
+
+    PlayerState->CurrentShield = 100;
+    HealthSet->Shield.CurrentValue = 100;
+    HealthSet->OnRep_Shield();
+    HealthSet->CurrentShield.CurrentValue = 100;
+    HealthSet->OnRep_CurrentShield();
+
+
+    PlayerController->bHasClientFinishedLoading = true;
+    PlayerController->bHasServerFinishedLoading = true;
+    PlayerController->bHasInitiallySpawned = true;
+    PlayerController->OnRep_bHasServerFinishedLoading();
+
+
+    PlayerState->bHasFinishedLoading = true;
+    PlayerState->bHasStartedPlaying = true;
+    PlayerState->OnRep_bHasStartedPlaying();
+
+
+    //auto FortRegisteredPlayerInfo = ((UFortGameInstance*)GetWorld()->OwningGameInstance)->RegisteredPlayers[0];
+    //auto FortRegisteredPlayerInfo = PlayerController->GetRegisteredPlayerInfo();
+    //auto FortRegisteredPlayerInfo = PlayerController->MyPlayerInfo;
+
+    //if (FortRegisteredPlayerInfo)
+    {
+//        auto HeroType = UObject::FindObject<UFortHeroType>("FortHeroType HID_Outlander_015_F_V1_SR_T04.HID_Outlander_015_F_V1_SR_T04");//FortRegisteredPlayerInfo->AthenaMenuHeroDef;
+//
+//        PlayerState->HeroType = HeroType;
+//        PlayerState->OnRep_HeroType();
+//
+//        static auto Head = UObject::FindObject<UCustomCharacterPart>("CustomCharacterPart F_Med_Head1.F_Med_Head1");
+//        static auto Body = UObject::FindObject<UCustomCharacterPart>("CustomCharacterPart F_Med_Soldier_01.F_Med_Soldier_01");
+//
+//#ifdef VERSION_7_3
+//        PlayerState->CharacterParts.Parts[(uint8_t)EFortCustomPartType::Head] = Head;
+//         PlayerState->CharacterParts.Parts[(uint8_t)EFortCustomPartType::Body] = Body;
+//#else
+//        PlayerState->CharacterParts[(uint8_t)EFortCustomPartType::Head] = Head;
+//        PlayerState->CharacterParts[(uint8_t)EFortCustomPartType::Body] = Body;
+//#endif
+//
+//
+//        PlayerState->OnRep_CharacterParts();
+
+        /*
+        auto Hero = FortRegisteredPlayerInfo->AthenaMenuHeroDef;
+
+        PlayerState->HeroType = Hero->GetHeroTypeBP();
+        PlayerState->OnRep_HeroType();
+
+        for (int i = 0; i < Hero->CharacterParts.Num(); i++)
+        {
+            auto Part = Hero->CharacterParts[i];
+            if (!Part) continue;
+
+            PlayerState->CharacterParts[i] = Part;
+        }
+
+        //PlayerState->CharacterBodyType = Hero->CharacterParts[1]->BodyTypesPermitted;
+        //Pawn->CharacterBodyType = Hero->CharacterParts[1]->BodyTypesPermitted;
+        //Pawn->CharacterGender = Hero->CharacterParts[1]->GenderPermitted;
+        PlayerState->OnRep_CharacterBodyType();
+        PlayerState->OnRep_CharacterParts();
+        */
+
+        //Default Skin
+        /*
+        auto Hero = FortRegisteredPlayerInfo->AthenaMenuHeroDef;
+
+        if (Hero)
+        {
+            UFortHeroType* HeroType = Hero->GetHeroTypeBP(); //UObject::FindObject<UFortHeroType>("FortHeroType HID_Outlander_015_F_V1_SR_T04.HID_Outlander_015_F_V1_SR_T04");
+            PlayerState->HeroType = HeroType;
+            PlayerState->OnRep_HeroType();
+
+            static auto Head = UObject::FindObject<UCustomCharacterPart>("CustomCharacterPart F_Med_Head1.F_Med_Head1");
+            static auto Body = UObject::FindObject<UCustomCharacterPart>("CustomCharacterPart F_Med_Soldier_01.F_Med_Soldier_01");
+
+            PlayerState->CharacterParts[(uint8_t)EFortCustomPartType::Head] = Head;
+            PlayerState->CharacterParts[(uint8_t)EFortCustomPartType::Body] = Body;
+            PlayerState->OnRep_CharacterParts();
+        }
+        */
+    }
+
+    return Pawn;
+}
+
 APlayerPawn_Athena_C* InitializePawn(AFortPlayerControllerAthena* PlayerController, FVector Loc = FVector(), FQuat Rot = FQuat(), bool open_glider = false)
 {
     if (PlayerController->Pawn)
@@ -744,10 +872,17 @@ APlayerPawn_Athena_C* InitializePawn(AFortPlayerControllerAthena* PlayerControll
 
     PlayerController->Pawn = Pawn;
     PlayerController->AcknowledgedPawn = Pawn;
+    PlayerController->AcknowledgedPawn = PlayerController->Pawn;
     PlayerController->OnRep_Pawn();
     PlayerController->Possess(Pawn);
 
-    if(open_glider)
+
+    Pawn->bReplicateMovement = true;
+    Pawn->OnRep_ReplicateMovement();
+    Pawn->OnRep_ReplicatedMovement();
+    Pawn->OnRep_ReplicatedBasedMovement();
+
+    if (open_glider)
         Pawn->CharacterMovement->SetMovementMode(EMovementMode::MOVE_Custom, 3U);
 
 
