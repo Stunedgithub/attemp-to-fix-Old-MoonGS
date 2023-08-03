@@ -19,6 +19,7 @@ inline std::vector<std::function<bool(UObject*, void*)>> toCall;
 #include "FortniteGame/Abilities/Emote.h"
 #include "FortniteGame/Abilities/Aircraft.h"
 #include "FortniteGame/Abilities/Abilities.h"
+#include "FortniteGame/SDKS/7_3/SDK/FN_Engine_classes.hpp"
 
 namespace Hooks
 {
@@ -33,6 +34,10 @@ namespace Hooks
             return Functions::LocalPlayer::SpawnPlayActor(Player, URL, OutError, World);
     }
 
+    inline UKismetMathLibrary* GetMath()
+    {
+        return (UKismetMathLibrary*)UKismetMathLibrary::StaticClass();
+    }
     uint64 GetNetMode(UWorld* World)
     {
         return ENetMode::NM_ListenServer;
@@ -49,12 +54,16 @@ namespace Hooks
 
         Functions::NetDriver::TickFlush(NetDriver, DeltaSeconds);
     }
-
+    /*
+    void WelcomePlayer(UWorld* World, UNetConnection* IncomingConnection)
+    {
+        Functions::World::WelcomePlayer(GetWorld(), IncomingConnection);
+    }
+    */
     char KickPlayer(__int64 a1, __int64 a2, __int64 a3)
     {
         return 1;
     }
-
     void World_NotifyControlMessage(UWorld* World, UNetConnection* Connection, uint8_t MessageType, int64* Bunch)
     {
         //MessageBoxA(0, "World_NotifyControlMessage", std::to_string(MessageType).c_str(), 0);
@@ -65,20 +74,33 @@ namespace Hooks
         }
         else if (MessageType == 5) //NMT_Login
         {
+            //MessageBoxA(0, "NMT_Login", std::to_string(MessageType).c_str(), 0);
+            Bunch[7] += (16 * 1024 * 1024);
+
+            auto OnlinePlatformName = FString(L"");
+
+            Functions::NetConnection::ReceiveFString(Bunch, Connection->ClientResponse);
+            Functions::NetConnection::ReceiveFString(Bunch, Connection->RequestURL);
+            Functions::NetConnection::ReceiveUniqueIdRepl(Bunch, Connection->PlayerID);
+            Functions::NetConnection::ReceiveFString(Bunch, OnlinePlatformName);
+            //MessageBoxW(0, L"OnlinePlatformName", OnlinePlatformName.c_str(), 0);
+
+            Bunch[7] -= (16 * 1024 * 1024);
+
             Functions::World::WelcomePlayer(GetWorld(), Connection);
         }
         else
             Functions::World::NotifyControlMessage(GetWorld(), Connection, MessageType, (void*)Bunch);
     }
 
-    APlayerController* SpawnPlayActor(UWorld* World, UPlayer* NewPlayer, ENetRole RemoteRole, FURL& URL, void* UniqueId, SDK::FString& Error, uint8_t NetPlayerIndex)
+    APlayerController* SpawnPlayActor(UWorld* World, UPlayer* NewPlayer, ENetRole RemoteRole, FURL& URL, void* UniqueId, SDK::FString& Error, uint8_t NetPlayerIndex, FVector Loc = FVector(), FQuat Rot = FQuat())
     {
         auto PlayerController = (AFortPlayerControllerAthena*)Functions::World::SpawnPlayActor(GetWorld(), NewPlayer, RemoteRole, URL, UniqueId, Error, NetPlayerIndex);
         NewPlayer->PlayerController = PlayerController;
 
         if (((AFortGameStateAthena*)(GetWorld()->GameState))->GamePhase >= EAthenaGamePhase::Aircraft)
         {
-            KickController(PlayerController, L"You can't join while the match is running.");
+            KickController(PlayerController, L"You can't join while the match is running, should've joined earlier.");
             return 0;
         }
 
@@ -98,33 +120,11 @@ namespace Hooks
             if (i == PlayersJoined.size() - 1)
                 PlayersJoined.push_back(NewPlayerIP);
         }
-
         InitializePawn(PlayerController);
+        // Movement Fix
 
-        Abilities::Inventory::InitInventory(PlayerController);
+            ; Abilities::Inventory::InitInventory(PlayerController);
 
-        auto entry = Abilities::Inventory::AddNewItem(PlayerController, ItemDefinitions::GetPickaxe(), 0);
-        Abilities::Inventory::Update(PlayerController);
-        EquipWeaponDefinition(PlayerController->Pawn, (UFortWeaponItemDefinition*)ItemDefinitions::GetPickaxe(), entry.ItemGuid, -1, true);
-
-
-        int consumable_count = 0;
-        auto consumable = ItemDefinitions::GetConsumable(false, &consumable_count, ItemDefinitions::ConsumableItemDefinitionNames::ShieldSmall);
-        entry = Abilities::Inventory::AddNewItem(PlayerController, consumable, 5, EFortQuickBars::Primary, consumable_count);
-        Abilities::Inventory::Update(PlayerController);
-        EquipWeaponDefinition(PlayerController->Pawn, (UFortWeaponItemDefinition*)consumable, entry.ItemGuid, -1, true);
-
-
-        PlayerState->TeamIndex = EFortTeam(teamIdx);
-
-        PlayerState->PlayerTeam->TeamMembers.Add(PlayerController);
-        PlayerState->PlayerTeam->Team = EFortTeam(teamIdx);
-
-        PlayerState->SquadId = teamIdx - 1;
-        PlayerState->OnRep_PlayerTeam();
-        PlayerState->OnRep_SquadId();
-
-        teamIdx++;
 
         PlayerController->OverriddenBackpackSize = 100;
         return PlayerController;
@@ -202,18 +202,22 @@ namespace Hooks
             }
         }
     }
-
     void ProcessEventHook(UObject* Object, UFunction* Function, void* Parameters)
     {
+        static auto Klixx3 = UObject::FindObject<UFunction>("Function Engine.PlayerController.ServerAcknowledgePossession");
+        if (Function == Klixx3)
+        {
+            auto PlayerController = (APlayerController*)Object; PlayerController->AcknowledgedPawn = PlayerController->Pawn;
+        }
         if (bTraveled)
         {
             if (!bListening)
             {
+
                 static auto ReadyToStartMatchFn = UObject::FindObject<UFunction>("Function Engine.GameMode.ReadyToStartMatch");
                 if (Function == ReadyToStartMatchFn)
                 {
                     Game::OnReadyToStartMatch();
-
 
 
 
@@ -234,7 +238,7 @@ namespace Hooks
                     InURL.Port = 7777;
 
                     MessageBoxA(0, "InitListen", std::to_string((uintptr_t)NewNetDriver).c_str(), 0);
-                    Functions::NetDriver::InitListen(NewNetDriver, GetWorld(), InURL, false, Error);
+                    Functions::NetDriver::InitListen(NewNetDriver, GetWorld(), InURL, true, Error);
                     MessageBoxA(0, "LISTENING", std::to_string((uintptr_t)NewNetDriver).c_str(), 0);
 
                     MessageBoxA(0, "NetDriver_SetWorld", 0, 0);
@@ -259,7 +263,6 @@ namespace Hooks
                             Pair.Value() = EClassRepNodeMapping::RelevantAllConnections;
                     }
 
-
                     GetWorld()->NetDriver = NewNetDriver;
                     GetWorld()->LevelCollections[0].NetDriver = NewNetDriver;
                     GetWorld()->LevelCollections[1].NetDriver = NewNetDriver;
@@ -271,16 +274,31 @@ namespace Hooks
 
 
 
+                    GameState->CurrentPlaylistInfo.BasePlaylist = UObject::FindObject<UFortPlaylistAthena>("FortPlaylistAthena Playlist_Playground.Playlist_Playground");
+                    GameState->CurrentPlaylistInfo.PlaylistReplicationKey++;
+
+                    GameState->PlayersLeft = 0;
+
+                    GameState->OnRep_PlayersLeft();
+
+
+
+
+
+
+
+
+
                     /*
                     HostBeacon = SpawnActor<AFortOnlineBeaconHost>();
-                    HostBeacon->ListenPort = 7776;
+                    HostBeacon->ListenPort = 5026;
                     auto bInitBeacon = Functions::OnlineBeaconHost::InitHost(HostBeacon);
 
                     HostBeacon->NetDriverName = FName(282);
                     HostBeacon->NetDriver->NetDriverName = FName(282);
                     HostBeacon->NetDriver->World = GetWorld();
 
-                    
+
                     FString Error;
                     auto InURL = FURL();
                     InURL.Port = 7777;
@@ -299,7 +317,7 @@ namespace Hooks
                         else if (key == AFortQuickBars::StaticClass())
                             Pair.Value() = EClassRepNodeMapping::RelevantAllConnections;
                     }
-                    
+
 
                     GetWorld()->NetDriver = HostBeacon->NetDriver;
                     GetWorld()->LevelCollections[0].NetDriver = HostBeacon->NetDriver;
@@ -317,20 +335,22 @@ namespace Hooks
                     return;
                 }
             }
+        }
 
-            for (int i = 0; i < toHook.size(); i++)
+        for (int i = 0; i < toHook.size(); i++)
+        {
+            if (Function == toHook[i])
             {
-                if (Function == toHook[i])
+                if (toCall[i](Object, Parameters))
                 {
-                    if (toCall[i](Object, Parameters))
-                    {
-                        return;
-                    }
-                    break;
+                    return;
                 }
+                break;
             }
         }
+
 
         return oProcessEvent(Object, Function, Parameters);
     }
 }
+

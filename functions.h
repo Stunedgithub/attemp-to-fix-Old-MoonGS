@@ -79,25 +79,18 @@ namespace Functions
     void Initialize()
     {
         Offsets::Imagebase = (uintptr_t)GetModuleHandleA(0);
-        MessageBoxA(0, "ImageBase", std::to_string((uintptr_t)Offsets::Imagebase).c_str(), 0);
 
         UObject::GObjects = Utils::FindPattern<decltype(UObject::GObjects)>(Patterns::GObjects, 3);
-        MessageBoxA(0, "GObjects", std::to_string((uintptr_t)UObject::GObjects).c_str(), 0);
 
         FMemory_Free = Utils::FindPattern<decltype(FMemory_Free)>(Patterns::Free);
-        MessageBoxA(0, "FMemory_Free", std::to_string((uintptr_t)FMemory_Free).c_str(), 0);
 
         FMemory_Malloc = Utils::FindPattern<decltype(FMemory_Malloc)>(Patterns::Malloc);
-        MessageBoxA(0, "FMemory_Malloc", std::to_string((uintptr_t)FMemory_Malloc).c_str(), 0);
 
         FMemory_Realloc = Utils::FindPattern<decltype(FMemory_Realloc)>(Patterns::Realloc);
-        MessageBoxA(0, "FMemory_Realloc", std::to_string((uintptr_t)FMemory_Realloc).c_str(), 0);
 
         FNameToString = Utils::FindPattern<decltype(FNameToString)>(Patterns::FNameToString);
-        MessageBoxA(0, "FNameToString", std::to_string((uintptr_t)FNameToString).c_str(), 0);
 
         NetDriver::TickFlush = Utils::FindPattern<decltype(NetDriver::TickFlush)>(Patterns::TickFlush);
-        MessageBoxA(0, "TickFlush", std::to_string((uintptr_t)NetDriver::TickFlush).c_str(), 0);
 
         Engine::CreateNetDriver = Utils::FindPattern<decltype(Engine::CreateNetDriver)>(Patterns::CreateNetDriver);
         MessageBoxA(0, "CreateNetDriver", std::to_string((uintptr_t)Engine::CreateNetDriver).c_str(), 0);
@@ -118,28 +111,25 @@ namespace Functions
         MessageBoxA(0, "SpawnPlayActor", std::to_string((uintptr_t)World::SpawnPlayActor).c_str(), 0);
 
         NetConnection::ReceiveUniqueIdRepl = Utils::FindPattern<decltype(NetConnection::ReceiveUniqueIdRepl)>(Patterns::ReceiveUniqueIdRepl);
-        MessageBoxA(0, "ReceiveUniqueIdRepl", std::to_string((uintptr_t)NetConnection::ReceiveUniqueIdRepl).c_str(), 0);
 
         NetConnection::ReceiveFString = Utils::FindPattern<decltype(NetConnection::ReceiveFString)>(Patterns::ReceiveFString);
-        MessageBoxA(0, "ReceiveFString", std::to_string((uintptr_t)NetConnection::ReceiveFString).c_str(), 0);
 
         OnlineSession::KickPlayer = Utils::FindPattern<decltype(OnlineSession::KickPlayer)>(Patterns::KickPlayer);
-        MessageBoxA(0, "KickPlayer", std::to_string((uintptr_t)OnlineSession::KickPlayer).c_str(), 0);
 
         Actor::GetNetMode = Utils::FindPattern<decltype(Actor::GetNetMode)>(Patterns::GetNetMode);
-        MessageBoxA(0, "GetNetMode", std::to_string((uintptr_t)Actor::GetNetMode).c_str(), 0);
+
 
         AbilitySystemComponent::GiveAbility = Utils::FindPattern<decltype(AbilitySystemComponent::GiveAbility)>(Patterns::GiveAbility);
-        MessageBoxA(0, "GiveAbility", std::to_string((uintptr_t)AbilitySystemComponent::GiveAbility).c_str(), 0);
+
 
         AbilitySystemComponent::InternalTryActivateAbility = Utils::FindPattern<decltype(AbilitySystemComponent::InternalTryActivateAbility)>(Patterns::InternalTryActivateAbility);
-        MessageBoxA(0, "InternalTryActivateAbility", std::to_string((uintptr_t)AbilitySystemComponent::InternalTryActivateAbility).c_str(), 0);
+
 
         AbilitySystemComponent::MarkAbilitySpecDirty = Utils::FindPattern<decltype(AbilitySystemComponent::MarkAbilitySpecDirty)>(Patterns::MarkAbilitySpecDirty);
-        MessageBoxA(0, "MarkAbilitySpecDirty", std::to_string((uintptr_t)AbilitySystemComponent::MarkAbilitySpecDirty).c_str(), 0);
+
 
         LocalPlayer::SpawnPlayActor = Utils::FindPattern<decltype(LocalPlayer::SpawnPlayActor)>(Patterns::LocalPlayerSpawnPlayActor);
-        MessageBoxA(0, "SpawnPlayActor", std::to_string((uintptr_t)LocalPlayer::SpawnPlayActor).c_str(), 0);
+
 
         GC::CollectGarbage = Utils::FindPattern<decltype(GC::CollectGarbage)>(Patterns::CollectGarbage, 0);
         MessageBoxA(0, "CollectGarbage", std::to_string((uintptr_t)GC::CollectGarbage).c_str(), 0);
