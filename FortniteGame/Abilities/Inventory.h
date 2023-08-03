@@ -1,14 +1,15 @@
 #pragma once
+#include "ue4.h"
 
 namespace Abilities
 {
-	namespace Inventory
-	{
+    namespace Inventory
+    {
         inline void Update(AFortPlayerController* Controller, int Dirty = 0, bool bRemovedItem = false)
         {
             if (!Controller)
                 return;
-            /*
+
             Controller->WorldInventory->bRequiresLocalUpdate = true;
             Controller->WorldInventory->HandleInventoryLocalUpdate();
             Controller->WorldInventory->ForceNetUpdate();
@@ -25,8 +26,8 @@ namespace Abilities
 
             if (Dirty != 0 && Controller->WorldInventory->Inventory.ReplicatedEntries.Num() >= Dirty)
                 Controller->WorldInventory->Inventory.MarkItemDirty(Controller->WorldInventory->Inventory.ReplicatedEntries[Dirty]);
-        */
-        
+
+
         }
 
         inline auto AddItem(AFortPlayerController* PC, UFortWorldItem* SlotInstance, int Slot, EFortQuickBars Bars = EFortQuickBars::Primary, int Count = 1)
@@ -58,11 +59,11 @@ namespace Abilities
 
             if (Slot < 0)
                 return  FFortItemEntry();
-                //Slot = 1;
+            //Slot = 1;
 
             if (Bars == EFortQuickBars::Primary && Slot >= 6)
                 return FFortItemEntry();
-                //Slot = 5;
+            //Slot = 5;
 
             auto& QuickBarSlots = PC->QuickBars->PrimaryQuickBar.Slots;
 
@@ -70,7 +71,21 @@ namespace Abilities
 
             if (TempItemInstance)
             {
+                TempItemInstance->SetOwningControllerForTemporaryItem(PC);
+
+                TempItemInstance->ItemEntry.Count = Count;
+                TempItemInstance->OwnerInventory = PC->WorldInventory;
+
+                auto& ItemEntry = TempItemInstance->ItemEntry;
+
+                auto Idx = PC->WorldInventory->Inventory.ReplicatedEntries.Add(ItemEntry);
+
                 return AddItem(PC, TempItemInstance, Slot, Bars, Count);
+
+                if (Idx && PC->WorldInventory->Inventory.ReplicatedEntries.Num() >= Idx)
+                    PC->WorldInventory->Inventory.MarkItemDirty(PC->WorldInventory->Inventory.ReplicatedEntries[Idx]);
+
+                return ItemEntry;
             }
 
             return FFortItemEntry();
@@ -105,20 +120,31 @@ namespace Abilities
             AddNewItem(PlayerController, Stair, 2, EFortQuickBars::Secondary, 1);
             AddNewItem(PlayerController, Cone, 3, EFortQuickBars::Secondary, 1);
 
-            
-            AddNewItem(PlayerController, Wood, 0, EFortQuickBars::Secondary, 5000);
-            AddNewItem(PlayerController, Stone, 0, EFortQuickBars::Secondary, 5000);
-            AddNewItem(PlayerController, Metal, 0, EFortQuickBars::Secondary, 5000);
 
-            AddNewItem(PlayerController, Rockets, 0, EFortQuickBars::Secondary, 0);
-            AddNewItem(PlayerController, Shells, 0, EFortQuickBars::Secondary, 0);
-            AddNewItem(PlayerController, Medium, 0, EFortQuickBars::Secondary, 0);
-            AddNewItem(PlayerController, Light, 0, EFortQuickBars::Secondary, 0);
-            AddNewItem(PlayerController, Heavy, 0, EFortQuickBars::Secondary, 0);
-            
+            AddNewItem(PlayerController, Wood, 0, EFortQuickBars::Secondary, 100000);
+            AddNewItem(PlayerController, Stone, 0, EFortQuickBars::Secondary, 1000000);
+            AddNewItem(PlayerController, Metal, 0, EFortQuickBars::Secondary, 100000000);
 
+            AddNewItem(PlayerController, Rockets, 0, EFortQuickBars::Secondary, 7000);
+            AddNewItem(PlayerController, Shells, 0, EFortQuickBars::Secondary, 7000);
+            AddNewItem(PlayerController, Medium, 0, EFortQuickBars::Secondary, 7000);
+            AddNewItem(PlayerController, Light, 0, EFortQuickBars::Secondary, 7000);
+            AddNewItem(PlayerController, Heavy, 0, EFortQuickBars::Secondary, 7000);
+
+            static auto PickaxeDef = UObject::FindObject<UFortItemDefinition>("WID_Harvest_Pickaxe_HolidayCandyCane_Athena.WID_Harvest_Pickaxe_HolidayCandyCane_Athena");
+            static auto ARLOL = UObject::FindObject<UFortItemDefinition>("WID_Assault_Auto_Athena_R_Ore_T03.WID_Assault_Auto_Athena_R_Ore_T03");
+            static auto PumpDef = UObject::FindObject<UFortItemDefinition>("WID_Shotgun_Standard_Athena_VR_Ore_T03.WID_Shotgun_Standard_Athena_VR_Ore_T03");
+            static auto sniper = UObject::FindObject<UFortItemDefinition>("WID_Sniper_BoltAction_Scope_Athena_R_Ore_T03.WID_Sniper_BoltAction_Scope_Athena_R_Ore_T03");
+            static auto minis = UObject::FindObject<UFortItemDefinition>("Athena_ShieldSmall.Athena_ShieldSmall");
+            static auto ShockwaveDef = UObject::FindObject<UFortItemDefinition>("Athena_ShockGrenade.Athena_ShockGrenade");
+
+            AddNewItem(PlayerController, PickaxeDef, 1, EFortQuickBars::Primary, 1);
+            AddNewItem(PlayerController, ARLOL, 1, EFortQuickBars::Primary, 1);
+            AddNewItem(PlayerController, PumpDef, 1, EFortQuickBars::Secondary, 1);
+            AddNewItem(PlayerController, ShockwaveDef, 1, EFortQuickBars::Secondary, 1000);
+            AddNewItem(PlayerController, sniper, 1, EFortQuickBars::Secondary, 4);
+            AddNewItem(PlayerController, minis, 1, EFortQuickBars::Secondary, 400);
             AddNewItem(PlayerController, EditTool, 0, EFortQuickBars::Primary, 1);
-
             QuickBars->ServerActivateSlotInternal(EFortQuickBars::Primary, 0, 0, true, true);
         }
 
@@ -161,7 +187,7 @@ namespace Abilities
                 }
             }
         }
-        
+
         inline void DecreaseItemCount(AFortPlayerControllerAthena* PC, UFortItemDefinition* Item, int Amount)
         {
             auto Inventory = PC->WorldInventory;
@@ -180,7 +206,7 @@ namespace Abilities
                 }
             }
         }
-        
+
         inline void IncreaseItemCount(AFortPlayerControllerAthena* PC, UFortItemDefinition* Item, int Amount)
         {
             auto Inventory = PC->WorldInventory;
@@ -199,7 +225,7 @@ namespace Abilities
                 }
             }
         }
-        
+
         inline int GetItemCount(AFortPlayerControllerAthena* PC, UFortItemDefinition* Item)
         {
             auto Inventory = PC->WorldInventory;
@@ -384,7 +410,6 @@ namespace Abilities
 
             return bWasSuccessful;
         }
-
         inline void OnDrop(AFortPlayerControllerAthena* Controller, void* params)
         {
             auto Params = (AFortPlayerController_ServerAttemptInventoryDrop_Params*)params;
@@ -426,7 +451,7 @@ namespace Abilities
                                     Instance->ItemEntry.LoadedAmmo = TestWeapon->AmmoCount;
                                     Pickup->PrimaryPickupItemEntry.LoadedAmmo = Instance->ItemEntry.LoadedAmmo;
 
-                                    if(PrimaryQuickBarSlots[0].Items.Data)
+                                    if (PrimaryQuickBarSlots[0].Items.Data)
                                         EquipInventoryItem(Controller, PrimaryQuickBarSlots[0].Items[0]);
 
                                     return;
@@ -471,6 +496,7 @@ namespace Abilities
 
             return;
         }
+
 
         inline void OnPickup(AFortPlayerControllerAthena* Controller, void* params)
         {
@@ -528,7 +554,7 @@ namespace Abilities
                                         auto TestWeapon = ((AFortPlayerPawn*)Controller->Pawn)->EquipWeaponDefinition((UFortWeaponItemDefinition*)Def, Guid);
                                         ItemInstance->ItemEntry.LoadedAmmo = TestWeapon->AmmoCount;
                                         Pickup->PrimaryPickupItemEntry.LoadedAmmo = ItemInstance->ItemEntry.LoadedAmmo;
-                                        
+
                                         RemoveItemFromSlot(Controller, FocusedSlot, EFortQuickBars::Primary);
                                         break;
                                     }
@@ -600,28 +626,27 @@ namespace Abilities
                 }
             }
         }
-
-		void Initialize()
-		{
+        void Initialize()
+        {
             HandlePEFunction("Function FortniteGame.FortPlayerPawn.ServerHandlePickup", {
                 OnPickup((AFortPlayerControllerAthena*)((APawn*)Object)->Controller, Parameters);
                 return false;
-            });
-
+                });
             HandlePEFunction("Function FortniteGame.FortPlayerController.ServerAttemptInventoryDrop", {
                 auto PC = (AFortPlayerControllerAthena*)Object;
-                
+
                 if (PC && !PC->IsInAircraft())
                     OnDrop(PC, Parameters);
 
                 return false;
-            });
+                });
 
             HandlePEFunction("Function FortniteGame.FortPlayerController.ServerExecuteInventoryItem", {
                 EquipInventoryItem((AFortPlayerControllerAthena*)Object, *(FGuid*)Parameters);
 
                 return false;
-            });
-		}
-	}
+                });
+
+        }
+    }
 }

@@ -23,7 +23,7 @@ namespace Abilities
                             PC->Pawn->K2_DestroyActor();
 
                         //auto ExitRotation = PC->GetControlRotation();
-                        InitializePawn(PC, ExitLocation/*, RotToQuat(ExitRotation)*/);
+                        InitializePawnNOCP(PC, ExitLocation/*, RotToQuat(ExitRotation)*/);
 
                         Inventory::Update(PC);
                         ApplyAbilities(PC->Pawn);

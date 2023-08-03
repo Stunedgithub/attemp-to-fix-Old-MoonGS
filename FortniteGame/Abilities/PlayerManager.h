@@ -1,9 +1,13 @@
 #pragma once
+inline UKismetMathLibrary* GetMath()
+{
+    return (UKismetMathLibrary*)UKismetMathLibrary::StaticClass();
+}
 
 namespace Abilities
 {
-	namespace PlayerManager
-	{
+    namespace PlayerManager
+    {
         void Spectate(UNetConnection* SpectatingConnection, AFortPlayerStateAthena* StateToSpectate)
         {
             /*
@@ -67,36 +71,41 @@ namespace Abilities
             */
         }
 
-		void Initialize()
-		{
-		    HandlePEFunction("Function FortniteGame.FortPlayerController.ServerLoadingScreenDropped", {
+        void Initialize()
+        {
+
+
+
+
+            HandlePEFunction("Function FortniteGame.FortPlayerController.ServerLoadingScreenDropped", {
                 auto Pawn = (APlayerPawn_Athena_C*)((AFortPlayerController*)Object)->Pawn;
 
-                //Pawn->PlayerState->SavedNetworkAddress
-                /*
-                {
-                    KickController((APlayerController*)Pawn->Controller, L"Sei bannato bozo haha");
-                    return false;
-                }*/
-	            
-                if (Pawn)
-                {
-                    Pawn->bCanBeDamaged = false;
-                    //Pawn->bGodMode = true;
-
-                    if(Pawn->AbilitySystemComponent)
-                        ApplyAbilities(Pawn);
-                }
-
+            //Pawn->PlayerState->SavedNetworkAddress
+            /*
+            {
+                KickController((APlayerController*)Pawn->Controller, L"Sei bannato bozo haha");
                 return false;
-            });
+            }*/
 
-            
+            if (Pawn)
+            {
+                Pawn->bCanBeDamaged = false;
+                //Pawn->bGodMode = true;
+
+                if (Pawn->AbilitySystemComponent)
+                    ApplyAbilities(Pawn);
+            }
+
+            return false;
+                });
+
+
             HandlePEFunction("Function FortniteGame.FortPlayerPawn.ServerChoosePart", {
                 return false;
-            });
-            
+                });
 
+            
+                        
             HandlePEFunction("Function FortniteGame.FortPlayerControllerZone.ClientOnPawnDied", {
                 auto Params = (AFortPlayerControllerZone_ClientOnPawnDied_Params*)Parameters;
                 auto DeathReport = Params->DeathReport;
@@ -213,8 +222,8 @@ namespace Abilities
 
                     //RESPAWN
                     if (bRespawn)
-                    {                        
-                        auto RespawnedPawn = InitializePawn(DeadPC, FVector(DeadPawnLocation.X, DeadPawnLocation.Y, DeadPawnLocation.Z + 10000), {}, true);
+                    {
+                        auto RespawnedPawn = InitializePawnNOCP(DeadPC, FVector(DeadPawnLocation.X, DeadPawnLocation.Y, DeadPawnLocation.Z + 2000), {}, true);
 
                         auto& HealthSet = RespawnedPawn->HealthSet;
                         HealthSet->CurrentShield.CurrentValue = 100;
@@ -232,9 +241,9 @@ namespace Abilities
 
                         if (bFound)
                             EquipInventoryItem(DeadPC, PickaxeEntry.ItemGuid);
-                        
+
                         DeadPC->RespawnPlayerAfterDeath();
-                        
+
                         auto CM = CreateCheatManager(DeadPC);
                         CM->RespawnPlayer();
                         CM->RespawnPlayerServer();
@@ -252,7 +261,7 @@ namespace Abilities
                 }
 
                 return false;
-            });
+                });
 
             HandlePEFunction("Function FortniteGame.FortPlayerPawn.ServerReviveFromDBNO", {
                 auto Params = (AFortPlayerPawn_ServerReviveFromDBNO_Params*)Parameters;
@@ -271,12 +280,11 @@ namespace Abilities
 
                 return false;
             });
-
             HandlePEFunction("Function FortniteGame.FortPlayerController.ServerReturnToMainMenu", {
                 ((AFortPlayerController*)Object)->ClientTravel(L"Frontend", ETravelType::TRAVEL_Absolute, false, FGuid());
 
                 return false;
             });
-		}
-	}
-}
+            }
+        }
+    }

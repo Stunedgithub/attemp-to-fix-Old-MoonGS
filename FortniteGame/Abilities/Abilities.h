@@ -31,18 +31,7 @@ namespace Abilities
             return false;
         });
 
-        HandlePEFunction("Function Engine.CheatManager.CheatScript", {
-            return false;
-        });
-
-        HandlePEFunction("Function FortniteGame.FortPlayerController.ServerCheatAll", {
-            auto PlayerController = (AFortPlayerControllerAthena*)Object;
-
-            if (PlayerController)
-                KickController((AFortPlayerControllerAthena*)Object, L"haha you bozo");
-            return true;
-        });
-
+   
 
         Build::Initialize();
         Edit::Initialize();
