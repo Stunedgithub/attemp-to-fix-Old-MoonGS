@@ -1,5 +1,6 @@
-join discord to updates https://discord.gg/jKDPHPrKNB
-Attempting to fix moongs 7.3 
+zjoin discord to updates https://discord.gg/jKDPHPrKNB
+Attempting to fix moongs 7.3 ![image](https://github.com/UniversaMp/attemp-to-fix-Old-MoonGS/assets/111585697/c1bf6a02-2a6a-4a02-8dc3-33e62a4dd7b9)
+
 
 Players need to join when map is loaded if not guaranteed crash
 
