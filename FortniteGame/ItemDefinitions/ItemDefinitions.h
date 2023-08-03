@@ -27,6 +27,8 @@ namespace ItemDefinitions
 		"/Game/Athena/Items/Weapons/WID_Assault_AutoHigh_Athena_SR_Ore_T03.WID_Assault_AutoHigh_Athena_SR_Ore_T03",
 		"/Game/Athena/Items/Weapons/WID_Shotgun_Standard_Athena_C_Ore_T03.WID_Shotgun_Standard_Athena_C_Ore_T03",
 		"/Game/Athena/Items/Weapons/WID_Shotgun_Standard_Athena_UC_Ore_T03.WID_Shotgun_Standard_Athena_UC_Ore_T03",
+		"/Game/Athena/Items/Weapons/WID_Shotgun_Standard_Athena_VR_Ore_T03.WID_Shotgun_Standard_Athena_VR_Ore_T03",
+		"/Game/Athena/Items/Weapons/WID_Shotgun_Standard_Athena_SR_Ore_T03.WID_Shotgun_Standard_Athena_SR_Ore_T03",
 		"/Game/Athena/Items/Weapons/WID_Shotgun_SemiAuto_Athena_UC_Ore_T03.WID_Shotgun_SemiAuto_Athena_UC_Ore_T03",
 		"/Game/Athena/Items/Weapons/WID_Shotgun_SemiAuto_Athena_R_Ore_T03.WID_Shotgun_SemiAuto_Athena_R_Ore_T03",
 		"/Game/Athena/Items/Weapons/WID_Shotgun_SemiAuto_Athena_VR_Ore_T03.WID_Shotgun_SemiAuto_Athena_VR_Ore_T03",
@@ -72,8 +74,9 @@ namespace ItemDefinitions
 		SmokeGrenade,
 		StickyGrenade,
 		Bush,
+		ShockwaveGrenade,
 		Medkit,
-		DanceGrenade
+		DanceGrenade,
 	};
 
 	std::vector<std::string> ConsumableItemDefinitionArray = {
@@ -88,6 +91,7 @@ namespace ItemDefinitions
 		"/Game/Athena/Items/Consumables/Bush/Athena_Bush.Athena_Bush",
 		"/Game/Athena/Items/Consumables/Medkit/Athena_Medkit.Athena_Medkit",
 		"/Game/Athena/Items/Consumables/DanceGrenade/Athena_DanceGrenade.Athena_DanceGrenade"
+		"/Game/Athena/Items/Consumables/ShockwaveGrenade/Athena_ShockGrenade.Athena_ShockGrenade"
 	};
 
 	std::vector<UFortItemDefinition*> ConsumableItemDefinitionAddresses = {};
@@ -163,9 +167,11 @@ namespace ItemDefinitions
 		auto ConsumableName = Consumable->GetPersistentName().c_str();
 
 		if (wcsstr(ConsumableName, L"athena_shieldsmall"))
-			*count = 3;
+			*count = 6;
 		else if (wcsstr(ConsumableName, L"athena_shields"))
-			*count = 1;
+			*count = 3;
+		else if (wcsstr(ConsumableName, L"Athena_ShockGrenade"))
+			*count = 3;
 		else if (wcsstr(ConsumableName, L"athena_purplestuff"))
 			*count = 1;
 		else if (wcsstr(ConsumableName, L"athena_supermedkit"))
@@ -214,6 +220,8 @@ namespace ItemDefinitions
 			return true;
 		else if (wcsstr(ConsumableName, L"athena_medkit"))
 			return true;
+		else if (wcsstr(ConsumableName, L"Athena_ShockGrenade"))
+			return true;
 		else if (wcsstr(ConsumableName, L"athena_dancegrenade"))
 			return true;
 
@@ -222,7 +230,7 @@ namespace ItemDefinitions
 
 	UFortItemDefinition* GetAmmo(bool bRandom, int* count, AmmoItemDefinitionNames name = {})
 	{
-		auto Ammo =  AmmoItemDefinitionAddresses[bRandom ? (rand() % AmmoItemDefinitionArray.size()) : name];
+		auto Ammo = AmmoItemDefinitionAddresses[bRandom ? (rand() % AmmoItemDefinitionArray.size()) : name];
 		*count = ((UFortAmmoItemDefinition*)Ammo)->DropCount;
 		return Ammo;
 	}
@@ -251,7 +259,7 @@ namespace ItemDefinitions
 
 	UFortItemDefinition* GetPickaxe()
 	{
-		return Pickaxe;//UObject::FindObject<UFortItemDefinition>(/*"WID_Harvest_Pickaxe_Athena_C_T01.WID_Harvest_Pickaxe_Athena_C_T01"*/"/Game/Athena/Items/Weapons/WID_Harvest_Pickaxe_Carrot.WID_Harvest_Pickaxe_Carrot");
+		return Pickaxe;//UObject::FindObject<UFortItemDefinition>(/*"WID_Harvest_Pickaxe_Athena_C_T01.WID_Harvest_Pickaxe_Athena_C_T01"*/"/Game/Athena/Items/Weapons/WID_Harvest_Pickaxe_Athena_C_T01.WID_Harvest_Pickaxe_Athena_C_T01");
 	}
 
 
